@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Comfortaa", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Brand palette — pulled 1:1 from the Figma comp (node 2:2) */
+  --color-terracotta-dark: #894c3b;
+  --color-terracotta-light: #b57e6f;
+  --color-cream: #ebddd1;
+  --color-salmon: #ebb2a4;
+  --color-brown: #905444;
+  --color-ink: #545454;
+
+  --shadow-photo:
+    -13px -2px 29px 0px rgba(0, 0, 0, 0.1),
+    -52px -10px 53px 0px rgba(0, 0, 0, 0.09),
+    -118px -22px 72px 0px rgba(0, 0, 0, 0.05),
+    -209px -39px 85px 0px rgba(0, 0, 0, 0.01);
+  --shadow-portrait:
+    -15px 16px 49px 0px rgba(0, 0, 0, 0.29),
+    -60px 65px 89px 0px rgba(0, 0, 0, 0.26),
+    -135px 147px 120px 0px rgba(0, 0, 0, 0.15),
+    -241px 261px 142px 0px rgba(0, 0, 0, 0.04);
+  --shadow-office:
+    -9px 11px 31px 0px rgba(0, 0, 0, 0.18),
+    -36px 42px 55px 0px rgba(0, 0, 0, 0.15),
+    -81px 95px 75px 0px rgba(0, 0, 0, 0.09),
+    -143px 170px 89px 0px rgba(0, 0, 0, 0.03);
+  --shadow-btn:
+    -2px 4px 4.5px 0px rgba(0, 0, 0, 0.1),
+    -8px 14px 8px 0px rgba(0, 0, 0, 0.09),
+    -17px 32px 11px 0px rgba(0, 0, 0, 0.05),
+    -31px 58px 13px 0px rgba(0, 0, 0, 0.01);
+  --shadow-card-hover:
+    0px 8px 10px 0px rgba(137, 76, 59, 0.06),
+    0px 20px 25px -5px rgba(137, 76, 59, 0.15);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+  }
+}
