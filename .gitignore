@@ -11,8 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-cirmen-landing-page.html
-wordpress/theme-upload/
+/cirmen-landing-page.html
 
 # Editor directories and files
 .vscode/*
