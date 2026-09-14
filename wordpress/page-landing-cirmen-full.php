@@ -32,24 +32,80 @@ if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $body_match)) {
 }
 
 /**
- * Extrai assets da LP (fonts, CSS inline, JS module) sem meta/title/favicon
- * que o tema WordPress já fornece.
+ * Extrai tags pareadas (<script>, <style>) por posição — evita regex em bundles ~2MB
+ * (PCRE backtrack) e o bug de misturar <link rel="icon"> com o JS até </script>.
  */
-$cirmen_head_assets = '';
-if ($head_html !== '' && preg_match_all(
-  '/<(?:link|style|script)\b[^>]*>.*?<\/(?:style|script)>|<(?:link|meta)\b[^>]*\/?>/is',
-  $head_html,
-  $asset_matches
-)) {
-  foreach ($asset_matches[0] as $tag) {
-    if (preg_match('/rel=["\']icon["\']/i', $tag)) {
+$cirmen_extract_paired = static function ($html, $tag) {
+  $out = [];
+  $offset = 0;
+  $open = '<' . $tag;
+  $close = '</' . $tag . '>';
+  $lower = strtolower($html);
+  $open_len = strlen($open);
+  $close_len = strlen($close);
+
+  while (($start = strpos($lower, $open, $offset)) !== false) {
+    $next = $start + $open_len;
+    if ($next < strlen($html) && strpos(" \t\n\r/>", $html[$next]) === false) {
+      $offset = $next;
       continue;
     }
-    if (preg_match('/<meta\b/i', $tag) && !preg_match('/name=["\']description["\']/i', $tag)) {
-      continue;
+    $end = strpos($lower, $close, $start);
+    if ($end === false) {
+      break;
     }
-    $cirmen_head_assets .= $tag . "\n";
+    $end += $close_len;
+    $out[] = substr($html, $start, $end - $start);
+    $offset = $end;
   }
+
+  return $out;
+};
+
+$cirmen_extract_void = static function ($html, $tag) {
+  $out = [];
+  $offset = 0;
+  $open = '<' . $tag;
+  $lower = strtolower($html);
+  $open_len = strlen($open);
+
+  while (($start = strpos($lower, $open, $offset)) !== false) {
+    $next = $start + $open_len;
+    if ($next < strlen($html) && strpos(" \t\n\r/>", $html[$next]) === false) {
+      $offset = $next;
+      continue;
+    }
+    $end = strpos($html, '>', $start);
+    if ($end === false) {
+      break;
+    }
+    $out[] = substr($html, $start, $end - $start + 1);
+    $offset = $end + 1;
+  }
+
+  return $out;
+};
+
+$cirmen_head_assets = '';
+$cirmen_scripts = '';
+
+foreach ($cirmen_extract_void($head_html, 'link') as $tag) {
+  if (preg_match('/rel=["\']icon["\']/i', $tag)) {
+    continue;
+  }
+  $cirmen_head_assets .= $tag . "\n";
+}
+
+foreach ($cirmen_extract_paired($head_html, 'style') as $tag) {
+  $cirmen_head_assets .= $tag . "\n";
+}
+
+foreach ($cirmen_extract_paired($head_html, 'script') as $tag) {
+  $cirmen_scripts .= $tag . "\n";
+}
+
+if ($cirmen_scripts === '') {
+  wp_die('Cirmen LP: nenhum <script> encontrado em cirmen-landing-page.html — rebuild e reenvie o HTML.');
 }
 
 add_filter('body_class', static function ($classes) {
@@ -61,9 +117,18 @@ add_action('wp_head', static function () use ($cirmen_head_assets) {
   if ($cirmen_head_assets === '') {
     return;
   }
-  echo "\n<!-- Cirmen LP assets -->\n";
+  echo "\n<!-- Cirmen LP head assets -->\n";
+  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
   echo $cirmen_head_assets;
-  echo "<!-- /Cirmen LP assets -->\n";
+  echo "<!-- /Cirmen LP head assets -->\n";
+}, 5);
+
+// Scripts depois do #root (e do markup do tema) para o React montar com segurança.
+add_action('wp_footer', static function () use ($cirmen_scripts) {
+  echo "\n<!-- Cirmen LP scripts -->\n";
+  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+  echo $cirmen_scripts;
+  echo "<!-- /Cirmen LP scripts -->\n";
 }, 5);
 
 get_header();
