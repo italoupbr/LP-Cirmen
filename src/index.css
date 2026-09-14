@@ -1,4 +1,7 @@
-@import "tailwindcss";
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 @theme {
   --font-heading: "Comfortaa", sans-serif;
@@ -37,6 +40,11 @@
     0px 20px 25px -5px rgba(137, 76, 59, 0.15);
 }
 
+/*
+  Preflight omitido de propósito: no WordPress a LP entra entre
+  header/footer nativos do tema — resets globais quebrariam a chrome.
+  Resets ficam escopados em #root.
+*/
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -44,16 +52,61 @@
 
   body {
     margin: 0;
+  }
+
+  #root {
     font-family: var(--font-body);
     background: #fff;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
-  h1,
-  h2,
-  h3,
-  h4 {
+  #root *,
+  #root *::before,
+  #root *::after {
+    box-sizing: border-box;
+    border: 0 solid;
+  }
+
+  #root h1,
+  #root h2,
+  #root h3,
+  #root h4 {
     font-family: var(--font-heading);
+    margin: 0;
+  }
+
+  #root p,
+  #root ul,
+  #root ol,
+  #root li {
+    margin: 0;
+    padding: 0;
+  }
+
+  #root img,
+  #root svg,
+  #root video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  #root a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  #root button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
   }
 }
